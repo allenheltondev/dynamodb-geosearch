@@ -1,0 +1,23 @@
+{
+  "name": "get-items-by-location",
+  "version": "1.0.0",
+  "description": "Returns a list of items in a given radius to the passed in location",
+  "main": "app.js",
+  "license": "MIT",
+  "dependencies": {
+    "dynamodb-geo": "^0.4.0",
+    "geocodio-library-node": "^1.1.0",
+    "http-status-codes": "^1.4.0"
+  },
+  "scripts": {
+    "test": "mocha **/tests/unit/*.js"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.543.0",
+    "chai": "^4.2.0",
+    "mocha": "^6.1.4"
+  },
+  "jshintConfig": {
+    "esversion": 8
+  }
+}

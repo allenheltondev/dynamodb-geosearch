@@ -1,0 +1,17 @@
+{
+  "name": "dynamodb-geosearch",
+  "version": "1.0.0",
+  "description": "This is a proof of concept to build a serverless geosearching app using dynamodb",
+  "devDependencies": {
+    "aws-sdk": "^2.543.0",
+    "chai": "^4.2.0",
+    "eslint": "^6.6.0",
+    "eslint-config-google": "^0.14.0",
+    "mocha": "^6.2.1"
+  },
+  "scripts": {
+    "test": "mocha **/tests/unit/*.js",
+    "deploy": "sam build &&  sam package --output-template-file packaged.yaml --s3-bucket REPLACE_ME && sam deploy --template-file packaged.yaml --stack-name dynamodb-geosearch --capabilities CAPABILITY_IAM"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,22 @@
+{
+  "name": "delete-item",
+  "version": "1.0.0",
+  "description": "Delete an item and the associated metadata by id",
+  "main": "app.js",
+  "license": "MIT",
+  "dependencies": {
+    "dynamodb-geo": "^0.4.0",
+    "http-status-codes": "^1.4.0"
+  },
+  "scripts": {
+    "test": "mocha **/tests/unit/*.js"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.543.0",
+    "chai": "^4.2.0",
+    "mocha": "^6.1.4"
+  },
+  "jshintConfig": {
+    "esversion": 8
+  }
+}

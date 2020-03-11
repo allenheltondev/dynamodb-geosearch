@@ -1,0 +1,249 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  dynamodb-geosearch
+
+  SAM Template for proof of concept using DynamoDB and geosearching utilities
+
+Parameters:
+  GeocodioApiKey:
+    Type: String
+    Default: REPLACE_ME
+
+  DynamoDBTableName:
+    Type: String
+    Default: geolocation
+
+Globals:
+  Function:
+    Runtime: nodejs12.x
+    Tracing: Active
+    Timeout: 8
+
+Resources:
+  AddItemGeolocation:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/add-item-geolocation/
+      Handler: app.lambdaHandler
+      Role: !GetAtt AddItemGeolocationRole.Arn
+      Events:
+        AddItem:
+          Type: Api
+          Properties:
+            Path: /items
+            Method: POST
+      Environment:
+        Variables:
+          GeocodioApiKey: !Ref GeocodioApiKey
+          DynamoDBTableName: !Ref DynamoDBTableName
+
+  AddItemGeolocationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: AddItemGeolocationPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action:
+                  - 'dynamodb:PutItem'
+                Resource: !GetAtt GeoLocationTable.Arn
+              - Effect: 'Allow'
+                Action:
+                  - 'xray:PutTelemetryRecords'
+                  - 'xray:PutTraceSegments'
+                Resource: '*'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSLambdaExecute
+
+  GetItemsByLocation:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/get-items-by-location/
+      Handler: app.lambdaHandler
+      Role: !GetAtt GetItemsByLocationRole.Arn
+      MemorySize: 320
+      Events:
+        AddItem:
+          Type: Api
+          Properties:
+            Path: /items
+            Method: GET
+      Environment:
+        Variables:
+          GeocodioApiKey: !Ref GeocodioApiKey
+          DynamoDBTableName: !Ref DynamoDBTableName
+
+  GetItemsByLocationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: GetItemsByLocationPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action:
+                  - 'dynamodb:GetItem'
+                  - 'dynamodb:Query'
+                Resource: !GetAtt GeoLocationTable.Arn
+              - Effect: 'Allow'
+                Action:
+                  - 'dynamodb:GetItem'
+                  - 'dynamodb:Query'
+                Resource:
+                  !Join [
+                    '/',
+                    [!GetAtt GeoLocationTable.Arn, 'index', 'geohash-index'],
+                  ]
+              - Effect: 'Allow'
+                Action:
+                  - 'xray:PutTelemetryRecords'
+                  - 'xray:PutTraceSegments'
+                Resource: '*'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSLambdaExecute
+
+  UpdateItemGeolocation:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/update-item-geolocation/
+      Handler: app.lambdaHandler
+      Role: !GetAtt UpdateItemGeolocationRole.Arn
+      Events:
+        AddItem:
+          Type: Api
+          Properties:
+            Path: /items/{itemId}
+            Method: PUT
+      Environment:
+        Variables:
+          GeocodioApiKey: !Ref GeocodioApiKey
+          DynamoDBTableName: !Ref DynamoDBTableName
+
+  UpdateItemGeolocationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: UpdateItemGeolocationPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action:
+                  - 'dynamodb:GetItem'
+                  - 'dynamodb:PutItem'
+                  - 'dynamodb:DeleteItem'
+                Resource: !GetAtt GeoLocationTable.Arn
+              - Effect: 'Allow'
+                Action:
+                  - 'xray:PutTelemetryRecords'
+                  - 'xray:PutTraceSegments'
+                Resource: '*'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSLambdaExecute
+
+  DeleteItem:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/delete-item/
+      Handler: app.lambdaHandler
+      Role: !GetAtt DeleteItemRole.Arn
+      Events:
+        AddItem:
+          Type: Api
+          Properties:
+            Path: /items/{itemId}
+            Method: DELETE
+      Environment:
+        Variables:
+          DynamoDBTableName: !Ref DynamoDBTableName
+
+  DeleteItemRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: DeleteItemPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action:
+                  - 'dynamodb:GetItem'
+                  - 'dynamodb:DeleteItem'
+                Resource: !GetAtt GeoLocationTable.Arn
+              - Effect: 'Allow'
+                Action:
+                  - 'xray:PutTelemetryRecords'
+                  - 'xray:PutTraceSegments'
+                Resource: '*'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSLambdaExecute
+
+  GeoLocationTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref DynamoDBTableName
+      AttributeDefinitions:
+        - AttributeName: hashKey
+          AttributeType: N
+        - AttributeName: rangeKey
+          AttributeType: S
+        - AttributeName: geohash
+          AttributeType: N
+      KeySchema:
+        - AttributeName: hashKey
+          KeyType: HASH
+        - AttributeName: rangeKey
+          KeyType: RANGE
+      BillingMode: PROVISIONED
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      LocalSecondaryIndexes:
+        - IndexName: geohash-index
+          KeySchema:
+            - AttributeName: hashKey
+              KeyType: HASH
+            - AttributeName: geohash
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
