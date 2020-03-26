@@ -1,6 +1,7 @@
+[![Twitter][1.1]][1] [![GitHub][2.1]][2] [![LinkedIn][3.1]][3] [![Medium][4.1]][4]
 # Dynamodb-geosearch Proof of Concept #
 ## Description ##
-This proof of concept was built to show the ability to do geosearching in AWS DynamoDB. It uses open source software to geocode and store/read/update geopoints in dynamo.
+This proof of concept was built to show the ability to do geosearching in AWS DynamoDB. It uses open source software to geocode and store/read/update geopoints in dynamo. For a detailed breakdown of this repository, refer to the [article on Medium](https://medium.com/better-programming/how-i-built-a-serverless-geo-search-app-with-dynamodb-491879233754).
 * [Dynamodb-geo](https://www.npmjs.com/package/dynamodb-geo)
 * [Geocodio](geocod.io)
 
@@ -30,3 +31,12 @@ You are able to deploy the solution any way you'd like, but included in the root
 ```
 npm run deploy
 ```
+[1.1]: http://i.imgur.com/tXSoThF.png
+[2.1]: http://i.imgur.com/0o48UoR.png
+[3.1]: http://i.imgur.com/lGwB1Hk.png
+[4.1]: http://i.imgur.com/BrJQF7t.png
+
+[1]: http://www.twitter.com/allenheltondev
+[2]: http://www.github.com/allenheltondev
+[3]: https://www.linkedin.com/in/allen-helton-85aa9650/
+[4]: https://medium.com/@allen.helton
